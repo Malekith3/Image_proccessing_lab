@@ -39,7 +39,6 @@ def PlotingDiscreteConvolution(x,h,y,titile):
     subplotlist[0].stem([i for i in range(1,np.size(x)+1)],x)
     subplotlist[1].stem([i for i in range(1,np.size(h)+1)],h)
     subplotlist[2].stem([i for i in range(1,np.size(y)+1)],y)
-    fig.show()
 
 if __name__ == "__main__ ":
     StripesUnit8((200,300),(200,50),6,[10 ,50 ,100, 150, 200 ,250])
