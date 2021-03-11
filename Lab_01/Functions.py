@@ -7,7 +7,7 @@ def StripesUnit8(size= (0,0) ,strips= (0,0) ,numberOfStrips=0 , stripsValueArray
     for i in range(0,numberOfStrips):
         matInit[0:strips[0],i*strips[1]:strips[1]+i*strips[1]] = stripsValueArray[i]
     return matInit
-    
+#-------------------------------------------------------------------    
 def ShowGrayImg(img,title=""):
     img = plt.imshow(img,cmap='gray', vmin=0, vmax=255)
     img = plt.gca()
@@ -15,16 +15,25 @@ def ShowGrayImg(img,title=""):
     img.get_yaxis().set_visible(False)
     img.set_title(title)
     plt.show()
+#-------------------------------------------------------------------
 def AlocateMatrix(index,matrix):
     
     if index == 0 :
         return np.uint8(np.abs(matrix))
     elif index == 1:
-        return np.uint8(matrix)
+        return np.uint8(np.clip(matrix,0,255))
     elif index == 2:
         return matrix
     elif index == 3:
         return np.uint8(matrix - np.amin(matrix))
+#-------------------------------------------------------------------       
+def Normalization(matrix):
+    ret = matrix.astype('float64')
+    minimum = np.min(ret)
+    maximum = np.max(ret)
+    ret = (ret - np.ones(ret.shape) * minimum) / ((maximum - minimum) * 1.001)
+    return ret
+#-------------------------------------------------------------------
 def PlotingDiscreteConvolution(x,h,y,titile):
     axis_font = {'fontname':'Arial', 'size':'18'}
     fig , subplotlist = plt.subplots(3,1,figsize=[10,5],sharey=True,sharex=True)
@@ -40,12 +49,52 @@ def PlotingDiscreteConvolution(x,h,y,titile):
     subplotlist[0].stem([i for i in range(1,np.size(x)+1)],x)
     subplotlist[1].stem([i for i in range(1,np.size(h)+1)],h)
     subplotlist[2].stem([i for i in range(1,np.size(y)+1)],y)
-
+#-------------------------------------------------------------------
 def SpatialSinus(A,fx,fy,fs,Nx,Ny,offset):
-    sine = np.zeros((Nx,Ny),dtype='uint8')
+    sine = np.zeros((Nx-1,Ny-1),dtype='uint8')
     fx_normalized = fx/fs
     fy_normalized = fy/fs
-    for i in range(0,Ny):
-        for j in range(0,Nx):
+    for i in range(0,Ny-1):
+        for j in range(0,Nx-1):
             sine[i,j] = np.round(offset + A*np.sin(2*np.pi*fy_normalized*i +2*np.pi*fx_normalized*j))
     return sine
+#-------------------------------------------------------------------
+def AddImages(listOfImages = [""]):
+    sumOfImages = np.zeros(np.shape(listOfImages[0]))
+    for image in listOfImages:
+        sumOfImages += image.astype("float")
+    return np.floor(sumOfImages/len(listOfImages)).astype('uint8')
+
+#-------------------------------------------------------------------
+"""
+function to calculate MSE 
+inputs: image - original image
+        noise - Image with noise 
+output: MSE - matrix that represents MSE
+"""
+def MSEOfTwoImages(image,noise):
+    return np.sum(np.sum(image - noise**2)) * 1/(np.size(image))
+#-------------------------------------------------------------------
+"""
+function to calculate SNR 
+inputs: image - original image
+        noise - Image with noise 
+output: SNR - matrix that represents MSE
+"""
+def SNROfTwoImages(image,noise):
+    Es = np.sum(np.sum(np.abs(image)**2))
+    En = np.sum(np.var(image - noise))
+    return Es/En
+#-------------------------------------------------------------------
+
+"""
+function to calculate PSNR 
+inputs: image - original image
+        noise - Image with noise  
+output: PSNR - matrix that represents MSE
+"""
+def PSNROfTwoImages(image,noise):
+    MSE = MSEOfTwoImages(image,noise)
+    return np.amax(image)**2/MSE
+
+#-------------------------------------------------------------------
