@@ -1,18 +1,19 @@
 import numpy as np
 import matplotlib.pyplot as plt
-#__name__ = "__main__ "
+
 
 def StripesUnit8(size= (0,0) ,strips= (0,0) ,numberOfStrips=0 , stripsValueArray= [0,0] ):
-    matInit = np.dot(stripsValueArray[0],np.ones(size))
+    matInit = stripsValueArray[0] * np.ones(size)
     for i in range(0,numberOfStrips):
         matInit[0:strips[0],i*strips[1]:strips[1]+i*strips[1]] = stripsValueArray[i]
     return matInit
     
-def ShowGrayImg(img):
+def ShowGrayImg(img,title=""):
     img = plt.imshow(img,cmap='gray', vmin=0, vmax=255)
     img = plt.gca()
     img.get_xaxis().set_visible(False)
     img.get_yaxis().set_visible(False)
+    img.set_title(title)
     plt.show()
 def AlocateMatrix(index,matrix):
     
@@ -40,5 +41,11 @@ def PlotingDiscreteConvolution(x,h,y,titile):
     subplotlist[1].stem([i for i in range(1,np.size(h)+1)],h)
     subplotlist[2].stem([i for i in range(1,np.size(y)+1)],y)
 
-if __name__ == "__main__ ":
-    StripesUnit8((200,300),(200,50),6,[10 ,50 ,100, 150, 200 ,250])
+def SpatialSinus(A,fx,fy,fs,Nx,Ny,offset):
+    sine = np.zeros((Nx,Ny),dtype='uint8')
+    fx_normalized = fx/fs
+    fy_normalized = fy/fs
+    for i in range(0,Ny):
+        for j in range(0,Nx):
+            sine[i,j] = np.round(offset + A*np.sin(2*np.pi*fy_normalized*i +2*np.pi*fx_normalized*j))
+    return sine
