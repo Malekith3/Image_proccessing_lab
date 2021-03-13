@@ -73,28 +73,29 @@ inputs: image - original image
 output: MSE - matrix that represents MSE
 """
 def MSEOfTwoImages(image,noise):
-    return np.sum(np.sum(image - noise**2)) * 1/(np.size(image))
+    tmpSum = np.sum((image - noise)**2,dtype='float64')
+    return round(tmpSum/(np.size(image)),2)
 #-------------------------------------------------------------------
 """
 function to calculate SNR 
 inputs: image - original image
         noise - Image with noise 
-output: SNR - matrix that represents MSE
+output: SNR - matrix that represents SNR
 """
 def SNROfTwoImages(image,noise):
-    Es = np.sum(np.sum(np.abs(image)**2))
-    En = np.sum(np.var(image - noise))
-    return Es/En
+    Es = np.sum((image - np.average(image))**2  , dtype='float64')/np.size(image)
+    En = np.sum((noise - np.average(noise))**2  , dtype='float64')/np.size(noise)
+    return round(10*np.log10(Es/En),2)
 #-------------------------------------------------------------------
 
 """
 function to calculate PSNR 
 inputs: image - original image
         noise - Image with noise  
-output: PSNR - matrix that represents MSE
+output: PSNR - matrix that represents PSNR
 """
 def PSNROfTwoImages(image,noise):
     MSE = MSEOfTwoImages(image,noise)
-    return np.amax(image)**2/MSE
+    return round(10*np.log10(np.amax(image)**2/MSE),2)
 
 #-------------------------------------------------------------------
