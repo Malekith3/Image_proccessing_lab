@@ -62,7 +62,7 @@ def SpatialSinus(A,fx,fy,fs,Nx,Ny,offset):
 def AddImages(listOfImages = [""]):
     sumOfImages = np.zeros(np.shape(listOfImages[0]))
     for image in listOfImages:
-        sumOfImages += image.astype("float")
+        sumOfImages += image.astype("float64")
     return np.floor(sumOfImages/len(listOfImages)).astype('uint8')
 
 #-------------------------------------------------------------------
