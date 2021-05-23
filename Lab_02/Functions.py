@@ -27,13 +27,13 @@ def InverseTransformUsingLookup(data,addition=0,multiplication=1):
 #-----------------------------------------1.3.5 functions------------------------------------------------------------
 def TransformUsingLookupFloat(data,dup=0.4,add=50.0/255.0):
   if not hasattr(TransformUsingLookupFloat, "lookupTable"): 
-    TransformUsingLookupFloat.lookupTable = transform(np.arange(256, dtype = 'float64') / 255)
+    TransformUsingLookupFloat.lookupTable = Transform(np.arange(256, dtype = 'float64') / 255)
   return np.take(TransformUsingLookupFloat.lookupTable, np.uint8(data*255))
 
 def InverseTransformUsingLookupFloat(data,dup=0.4,add=50.0/255.0):
   if not hasattr(InverseTransformUsingLookupFloat, "lookupTable"): 
     InverseTransformUsingLookupFloat.lookupTable = InverseTransform(np.arange(256, dtype = 'float64') / 255)
-  return np.take(inverse_transform_using_lookup_float.lookupTable,  np.uint8(data*255))
+  return np.take(InverseTransformUsingLookupFloat.lookupTable,  np.uint8(data*255))
 #---------------------------------------------------------------------------------------------------------------------
 
 #-----------------------------------------------
@@ -114,11 +114,77 @@ def PrintHistogram(img,listOfPlots = {} , typeOfplot="histogram"):
           a.set_title(title,**axis_font)
           a.set_xlabel(xlable,**axis_font)
           a.set_ylabel(ylable,**axis_font)
-        
+#-------------------------------------------------------------------------------------------------------------------------------------
+"""
+Function of histogram stretching
+  (0,0) - (x1, y1)
+  (x1, y1) - (x2, y2)
+  (x2, y2) - (255, 255)
+  Input :
+  grayscale image uint or float64 in range [0.0,1.0]
+  x1,y1,x2,y2 - uint8
+  Assuming:
+  x1 > 0
+  x1 < x2 < 255
+  y1 < y2
+"""       
+def HistogramStretch(img, x1 = 1, y1 = 1, x2 = 254, y2 = 254,reload=False):
+  #converting imag in float to uint8 for LUT
+  is_float = (np.dtype(img[0][0]) == 'float64')
+  if (is_float):
+    img = (img * 255).astype('uint8')
+  
 
+  #setting up LUT
+  if not hasattr(HistogramStretch, "lookupTable") or reload==True:
+    ramp1 = float(y1/x1)
+    ramp2 = float ((y2-y1)/(x2-x1))
+    ramp3 = float((255-y2)/(255-x2))
+    temp = []
+    for i in range(0,256):
+      if i < x1:
+        temp.append((ramp1 * i))
+      elif i <= x2:
+        temp.append((y1 + ramp2 * (i - x1)))
+      else:
+        temp.append((y2 + ramp3 * (i - x2)))
+    HistogramStretch.lookupTable = np.array(temp,dtype='uint8')
+
+  output = np.take(HistogramStretch.lookupTable, img)
+
+  if (is_float):
+    return (output / 255.0)
+  else:
+    return output
+
+#-------------------------------------------------------------------------------------------------------------------------------------
+def HistogramFullStreach(img):
+  is_float = (np.dtype(img[0][0]) == 'float64')
+  if (is_float):
+    img = (img * 255).astype('uint8')
+
+  temp = []
+  ramp = 1/(np.amax(img) - np.amin(img))
+  for i in range(256):
+    temp.append(255*((i-np.amin(img))*ramp))
+  temp = np.array(temp,dtype='uint8')
+  output = np.take(temp, img)
+
+  if (is_float):
+    return (output / 255.0)
+  else:
+    return output
+"""
+function to calculate MSE 
+inputs: image - original image
+        noise - Image with noise 
+output: MSE - matrix that represents MSE
+"""
+def MSEOfTwoImages(image,noise):
+    tmpSum = np.sum((image - noise)**2,dtype='float64')
+    return round(tmpSum/(np.size(image)),2)
 #-------------------------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
   img_gray = cv.imread("Pictures\\tire.tif", cv.IMREAD_GRAYSCALE)
-  Histogram(img_gray,"all")
-  plt.show()
-  
+plt.plot(HistogramFullStreach(np.expand_dims(np.arange(256, dtype = 'uint8'), axis = 0)))
+plt.show()

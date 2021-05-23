@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools
+from  scipy.signal import convolve2d
+
+axis_font = {'fontname':'Arial', 'size':'16'}
 #-------------------------------------------------------------------------------------------------------------
 """
 Input:parameter to sample cosine function
@@ -43,4 +46,25 @@ def ImageDataAnalysis(signal,noisedSignal):
     psnr = 20*np.log10(255) - mse # 255 is the maximum grey value
 
     return np.real(mse), round(np.real(snr),3), round(np.real(psnr),3)
-    
+#-------------------------------------------------------------------------------------------------------------    
+def convolve2dFilterAndPlot(img, filter, conv_mode = 'same'):
+  """Perform 2D convolution and plot the results and FFT of result
+  
+  conv_mode:
+  full - The output is the full discrete linear convolution of the inputs. (Default)
+  valid - The output consists only of those elements that do not rely on the zero-padding
+  same - The output is the same size as in1, centered with respect to the ‘full’ output.
+  """
+
+  filtered = convolve2d(img, filter, mode = conv_mode)
+  figure, axis = plt.subplots(1,3,figsize=[20,6])
+  titles = [f"Image, shape = {img.shape}",'log10(1+abs(fft(filtered)))',f"Filtered, shape = {filtered.shape} ({conv_mode})"]
+  plots = [img,np.fft.fftshift(np.log10(abs(np.fft.fft2(filtered)) + 1)),filtered]
+  for (ax ,title,plot) in itertools.zip_longest(axis,titles,plots):
+      ax.imshow(plot, cmap = 'gray', vmin = 0, vmax = np.max(plot))
+      ax.set_title(title,**axis_font)
+      ax.get_xaxis().set_visible(False)
+      ax.get_yaxis().set_visible(False)
+  figure.tight_layout()
+  plt.show()
+
