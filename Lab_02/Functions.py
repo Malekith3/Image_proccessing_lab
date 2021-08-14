@@ -1,5 +1,5 @@
 #Functions defenition
-#__name__ = "__main__"
+__name__ = "__main__"
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -185,6 +185,6 @@ def MSEOfTwoImages(image,noise):
     return round(tmpSum/(np.size(image)),2)
 #-------------------------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-  img_gray = cv.imread("Pictures\\tire.tif", cv.IMREAD_GRAYSCALE)
-plt.plot(HistogramFullStreach(np.expand_dims(np.arange(256, dtype = 'uint8'), axis = 0)))
-plt.show()
+  img_gray = cv.imread("Pictures/tire.tif", cv.IMREAD_GRAYSCALE)
+  print(img_gray)
+  plt.show()
